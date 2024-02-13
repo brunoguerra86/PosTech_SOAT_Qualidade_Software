@@ -121,7 +121,10 @@ class MensagemRepositoryTest {
   }
 
   private Mensagem gerarMensagem() {
-    return Mensagem.builder().usuario("joe").conteudo("xpto test").build();
+    return Mensagem.builder()
+            .usuario("jose")
+            .conteudo("xpto test")
+            .build();
   }
 
 }
