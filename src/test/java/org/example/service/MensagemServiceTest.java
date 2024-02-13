@@ -52,12 +52,15 @@ class MensagemServiceTest {
 
     @Test
     void devePermitirRegistrarMensagem() {
+      // Arrange
       var mensagem = MensagemHelper.gerarMensagem();
       when(mensagemRepository.save(any(Mensagem.class)))
           .thenAnswer(i -> i.getArgument(0));
 
+      // Act
       var mensagemArmazenada = mensagemService.criarMensagem(mensagem);
 
+      // Assert
       assertThat(mensagemArmazenada)
           .isInstanceOf(Mensagem.class)
           .isNotNull();
