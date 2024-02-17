@@ -108,4 +108,10 @@ public class DefinicaoPassos {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("mensagem removida"));
     }
+
+    @Dado("passo em desenvolvimento")
+    public void passo_em_desenvolvimento() {
+        // Write code here that turns the phrase above into concrete actions
+        throw new io.cucumber.java.PendingException();
+    }
 }

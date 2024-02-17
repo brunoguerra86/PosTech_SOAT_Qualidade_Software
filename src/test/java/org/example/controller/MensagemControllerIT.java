@@ -3,6 +3,7 @@ package org.example.controller;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+import static org.example.handler.GlobalExceptionHandler.MSG_ID_INVALIDO;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.notNullValue;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +30,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @Sql(scripts = {"/clean.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class MensagemControllerIT {
 
@@ -49,12 +52,12 @@ class MensagemControllerIT {
       var mensagemRequest = MensagemHelper.gerarMensagemRequest();
 
       given()
-        .filter(new AllureRestAssured())
+          .filter(new AllureRestAssured())
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .body(mensagemRequest)
-          .when()
+      .when()
           .post("/mensagens")
-          .then()
+      .then()
           .statusCode(HttpStatus.CREATED.value())
           .body("$", hasKey("id"))
           .body("$", hasKey("usuario"))
@@ -194,7 +197,7 @@ class MensagemControllerIT {
           .get("/mensagens/{id}", id)
           .then()
           .statusCode(HttpStatus.BAD_REQUEST.value())
-          .body(equalTo("ID inválido"));
+          .body(equalTo(MSG_ID_INVALIDO));
     }
   }
 
@@ -249,7 +252,7 @@ class MensagemControllerIT {
           .put("/mensagens/{id}", id)
           .then()
           .statusCode(HttpStatus.BAD_REQUEST.value())
-          .body(equalTo("ID inválido"));
+          .body(equalTo(MSG_ID_INVALIDO));
     }
 
     @Test
@@ -309,7 +312,7 @@ class MensagemControllerIT {
           .delete("/mensagens/{id}", id)
           .then()
           .statusCode(HttpStatus.BAD_REQUEST.value())
-          .body(equalTo("ID inválido"));
+          .body(equalTo(MSG_ID_INVALIDO));
     }
 
   }
@@ -356,7 +359,7 @@ class MensagemControllerIT {
           .put("/mensagens/{id}/gostei", id)
           .then()
           .statusCode(HttpStatus.BAD_REQUEST.value())
-          .body(equalTo("ID inválido"));
+          .body(equalTo(MSG_ID_INVALIDO));
     }
   }
 

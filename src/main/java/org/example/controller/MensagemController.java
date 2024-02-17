@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.example.handler.GlobalExceptionHandler.MSG_ID_INVALIDO;
+
 @Slf4j
 @RestController
 @RequestMapping("/mensagens")
@@ -51,7 +53,7 @@ public class MensagemController {
       var mensagemEncontrada = mensagemService.buscarMensagem(uuid);
       return new ResponseEntity<>(mensagemEncontrada, HttpStatus.OK);
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body("ID inválido");
+      return ResponseEntity.badRequest().body(MSG_ID_INVALIDO);
     } catch (MensagemNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
@@ -82,7 +84,7 @@ public ResponseEntity<?> atualizarMensagem(
     var mensagemAtualizada = mensagemService.alterarMensagem(uuid, mensagem);
     return new ResponseEntity<>(mensagemAtualizada, HttpStatus.OK);
   } catch (IllegalArgumentException e) {
-    return ResponseEntity.badRequest().body("ID inválido");
+    return ResponseEntity.badRequest().body(MSG_ID_INVALIDO);
   } catch (MensagemNotFoundException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
   }
@@ -96,7 +98,7 @@ public ResponseEntity<?> incrementarGostei(@PathVariable String id) {
     var mensagemAtualizada = mensagemService.incrementarGostei(uuid);
     return new ResponseEntity<>(mensagemAtualizada, HttpStatus.OK);
   } catch (IllegalArgumentException e) {
-    return ResponseEntity.badRequest().body("ID inválido");
+    return ResponseEntity.badRequest().body(MSG_ID_INVALIDO);
   } catch (MensagemNotFoundException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
   }
@@ -110,7 +112,7 @@ public ResponseEntity<?> apagarMensagem(@PathVariable String id) {
     mensagemService.apagarMensagem(uuid);
     return new ResponseEntity<>("mensagem removida", HttpStatus.OK);
   } catch (IllegalArgumentException e) {
-    return ResponseEntity.badRequest().body("ID inválido");
+    return ResponseEntity.badRequest().body(MSG_ID_INVALIDO);
   } catch (MensagemNotFoundException e) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
   }

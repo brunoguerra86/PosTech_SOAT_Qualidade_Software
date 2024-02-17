@@ -1,12 +1,16 @@
 
 package org.example.service;
 
+import java.util.UUID;
 import org.example.model.Mensagem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.UUID;
-
+/**
+ * Interface MensagemService.
+ *
+ * @author Bruno Guerra
+ */
 public interface MensagemService {
 
   Mensagem criarMensagem(Mensagem mensagem);

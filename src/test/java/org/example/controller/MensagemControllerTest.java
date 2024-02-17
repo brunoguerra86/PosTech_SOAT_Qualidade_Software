@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.example.handler.GlobalExceptionHandler.MSG_ID_INVALIDO;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -83,99 +84,101 @@ class MensagemControllerTest {
   @Nested
   class RegistrarMensagem {
 
-@Test
-void devePermitirRegistrarMensagem() throws Exception {
-  var mensagemRequest = MensagemHelper.gerarMensagemRequest();
-  when(mensagemService.criarMensagem(any(Mensagem.class)))
-      .thenAnswer(i -> i.getArgument(0));
+    @Test
+    void devePermitirRegistrarMensagem() throws Exception {
+      // Arrange
+      var mensagemRequest = MensagemHelper.gerarMensagemRequest();
+      when(mensagemService.criarMensagem(any(Mensagem.class)))
+          .thenAnswer(i -> i.getArgument(0));
 
-  mockMvc.perform(post("/mensagens")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(asJsonString(mensagemRequest)))
-//                    .andDo(print())
-      .andExpect(status().isCreated());
-  verify(mensagemService, times(1))
-      .criarMensagem(any(Mensagem.class));
-}
+      // Act & Assert
+      mockMvc.perform(post("/mensagens")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(mensagemRequest)))
+//                        .andDo(print())
+          .andExpect(status().isCreated());
+      verify(mensagemService, times(1))
+          .criarMensagem(any(Mensagem.class));
+    }
 
-@Test
-void deveGerarExcecao_QuandoRegistrarMensagem_UsuarioEmBraco() throws Exception {
-  var mensagemRequest = MensagemRequest.builder()
-      .usuario("")
-      .conteudo("xpto")
-      .build();
+    @Test
+    void deveGerarExcecao_QuandoRegistrarMensagem_UsuarioEmBraco() throws Exception {
+      var mensagemRequest = MensagemRequest.builder()
+          .usuario("")
+          .conteudo("xpto")
+          .build();
 
-  mockMvc.perform(post("/mensagens")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(asJsonString(mensagemRequest)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.message").value("Validation error"))
-      .andExpect(jsonPath("$.errors.[0]").value("usuário não pode estar vazio"));
-  verify(mensagemService, never())
-      .criarMensagem(any(Mensagem.class));
-}
+      mockMvc.perform(post("/mensagens")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(mensagemRequest)))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Validation error"))
+          .andExpect(jsonPath("$.errors.[0]").value("usuário não pode estar vazio"));
+      verify(mensagemService, never())
+          .criarMensagem(any(Mensagem.class));
+    }
 
-@Test
-void deveGerarExcecao_QuandoRegistrarMensagem_ConteudoEmBranco() throws Exception {
-  var mensagemRequest = MensagemRequest.builder()
-      .usuario("John")
-      .conteudo("")
-      .build();
+    @Test
+    void deveGerarExcecao_QuandoRegistrarMensagem_ConteudoEmBranco() throws Exception {
+      var mensagemRequest = MensagemRequest.builder()
+          .usuario("John")
+          .conteudo("")
+          .build();
 
-  mockMvc.perform(post("/mensagens")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(asJsonString(mensagemRequest)))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.message").value("Validation error"))
-      .andExpect(jsonPath("$.errors.[0]").value("conteúdo não pode estar vazio"));
-  verify(mensagemService, never()).criarMensagem(any(Mensagem.class));
-}
+      mockMvc.perform(post("/mensagens")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(mensagemRequest)))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.message").value("Validation error"))
+          .andExpect(jsonPath("$.errors.[0]").value("conteúdo não pode estar vazio"));
+      verify(mensagemService, never()).criarMensagem(any(Mensagem.class));
+    }
 
-@Test
-void deveGerarExcecao_QuandoRegistrarMensagem_CamposInvalidos() throws Exception {
-  var mensagemRequest = new ObjectMapper().readTree(
-      "{\"ping\": \"ping\", \"quack\": \"adalberto\"}");
+    @Test
+    void deveGerarExcecao_QuandoRegistrarMensagem_CamposInvalidos() throws Exception {
+      var mensagemRequest = new ObjectMapper().readTree(
+          "{\"ping\": \"ping\", \"quack\": \"adalberto\"}");
 
-  mockMvc.perform(post("/mensagens")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(asJsonString(mensagemRequest)))
-//      .andDo(print())
-      .andExpect(status().isBadRequest())
-      .andExpect(result -> {
-        String json = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        assertThat(json).contains("Validation error");
-        assertThat(json).contains("usuário não pode estar vazio");
-        assertThat(json).contains("conteúdo não pode estar vazio");
-      });
-  verify(mensagemService, never())
-      .criarMensagem(any(Mensagem.class));
-}
+      mockMvc.perform(post("/mensagens")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(mensagemRequest)))
+    //      .andDo(print())
+          .andExpect(status().isBadRequest())
+          .andExpect(result -> {
+            String json = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+            assertThat(json).contains("Validation error");
+            assertThat(json).contains("usuário não pode estar vazio");
+            assertThat(json).contains("conteúdo não pode estar vazio");
+          });
+      verify(mensagemService, never())
+          .criarMensagem(any(Mensagem.class));
+    }
 
-@Test
-void deveGerarExcecao_QuandoRegistrarMensagem_PayloadComXml() throws Exception {
-  String xmlPayload = "<mensagem><usuario>John</usuario><conteudo>Conteúdo da mensagem</conteudo></mensagem>";
+    @Test
+    void deveGerarExcecao_QuandoRegistrarMensagem_PayloadComXml() throws Exception {
+      String xmlPayload = "<mensagem><usuario>John</usuario><conteudo>Conteúdo da mensagem</conteudo></mensagem>";
 
-  mockMvc.perform(post("/mensagens")
-          .contentType(MediaType.APPLICATION_XML)
-          .content(xmlPayload))
-//      .andDo(print())
-      .andExpect(status().isUnsupportedMediaType());
-  verify(mensagemService, never()).criarMensagem(any(Mensagem.class));
-}
+      mockMvc.perform(post("/mensagens")
+              .contentType(MediaType.APPLICATION_XML)
+              .content(xmlPayload))
+    //      .andDo(print())
+          .andExpect(status().isUnsupportedMediaType());
+      verify(mensagemService, never()).criarMensagem(any(Mensagem.class));
+    }
 
-@Test
-void deveGerarMensagemDeLog_QuandoRegistrarMensagem() throws Exception {
-  var mensagemRequest = MensagemHelper.gerarMensagemRequest();
-  when(mensagemService.criarMensagem(any(Mensagem.class))).thenAnswer(i -> i.getArgument(0));
+    @Test
+    void deveGerarMensagemDeLog_QuandoRegistrarMensagem() throws Exception {
+      var mensagemRequest = MensagemHelper.gerarMensagemRequest();
+      when(mensagemService.criarMensagem(any(Mensagem.class))).thenAnswer(i -> i.getArgument(0));
 
-  mockMvc.perform(post("/mensagens")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(asJsonString(mensagemRequest)))
-      .andExpect(status().isCreated());
-  verify(mensagemService, times(1))
-      .criarMensagem(any(Mensagem.class));
-  assertThat(logTracker.size()).isEqualTo(1);
-}
+      mockMvc.perform(post("/mensagens")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(mensagemRequest)))
+          .andExpect(status().isCreated());
+      verify(mensagemService, times(1))
+          .criarMensagem(any(Mensagem.class));
+      assertThat(logTracker.size()).isEqualTo(1);
+    }
   }
 
   @Nested
@@ -225,7 +228,7 @@ void deveGerarMensagemDeLog_QuandoRegistrarMensagem() throws Exception {
       mockMvc.perform(get("/mensagens/{id}", id)
               .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isBadRequest())
-          .andExpect(content().string("ID inválido"));
+          .andExpect(content().string(MSG_ID_INVALIDO));
       verify(mensagemService, never())
           .buscarMensagem(any(UUID.class));
     }
@@ -299,7 +302,7 @@ void deveGerarMensagemDeLog_QuandoRegistrarMensagem() throws Exception {
               .content(asJsonString(mensagemRequest)))
 //          .andDo(print())
           .andExpect(status().isBadRequest())
-          .andExpect(content().string("ID inválido"));
+          .andExpect(content().string(MSG_ID_INVALIDO));
       verify(mensagemService, never())
           .apagarMensagem(any(UUID.class));
     }
@@ -360,7 +363,7 @@ void deveGerarMensagemDeLog_QuandoRegistrarMensagem() throws Exception {
       mockMvc.perform(delete("/mensagens/{id}", id)
               .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isBadRequest())
-          .andExpect(content().string("ID inválido"));
+          .andExpect(content().string(MSG_ID_INVALIDO));
       verify(mensagemService, never())
           .apagarMensagem(any(UUID.class));
     }
@@ -427,7 +430,7 @@ void deveGerarExcecao_QuandoIncrementarGostei_IdInvalido()
   mockMvc.perform(put("/mensagens/{id}/gostei", id)
           .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
-      .andExpect(content().string("ID inválido"));
+      .andExpect(content().string(MSG_ID_INVALIDO));
   verify(mensagemService, never()).incrementarGostei(any(UUID.class));
 }
 
